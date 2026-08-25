@@ -4,6 +4,7 @@
     const d = new Date(); d.setDate(d.getDate() - offset);
     return d.toISOString().slice(0,10);
   }
+  document.getElementById('title').textContent = `Top 20 Momentum Results (${dateStr(0)})`;
   const tryUrls = [];
   for(let i = 0; i <= 5; i++){
     const ds = dateStr(i);
