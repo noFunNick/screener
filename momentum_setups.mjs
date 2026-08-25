@@ -35,7 +35,7 @@ function readConfig(file='config.properties'){
 function formatDate(d){ return d.toISOString().slice(0,10); }
 function tomorrow(){ const d = new Date(); d.setDate(d.getDate()+1); return formatDate(d); }
 
-async function hasLiquidOptions(symbol, min_oi=500, max_spread_pct=0.20){
+async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25){
   try{
     const opt = await yahooFinance.options(symbol);
     if(!opt || !opt.options || !opt.options.length) return false;
@@ -46,8 +46,8 @@ async function hasLiquidOptions(symbol, min_oi=500, max_spread_pct=0.20){
     const allContracts = [...calls, ...puts];
     if(!allContracts.length) return false;
 
-    // Include any contract with a strike within 10% of current price (either direction)
-    const otm_pct = 0.10;
+    // Include any contract with a strike within 15% of current price (either direction)
+    const otm_pct = 0.15;
     const lo = price * (1 - otm_pct);
     const hi = price * (1 + otm_pct);
 
@@ -113,7 +113,7 @@ async function analyze(symbol, periodStart){
     const dollarVol = closes.reduce((s,c,idx)=>s + c * vols[idx], 0) / Math.min(20, closes.length);
     if(dollarVol < 15_000_000) return null;
 
-    const options_ok = await hasLiquidOptions(symbol, 500, 0.20);
+    const options_ok = await hasLiquidOptions(symbol, 250, 0.25);
 
     // RS vs SPY via chart()
     const spyData = await yahooFinance.chart('SPY', { period1: periodStart, period2: tomorrow(), interval: '1d' });
