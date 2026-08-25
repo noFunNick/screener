@@ -2,9 +2,9 @@ name: Daily Scan & Deploy to GitHub Pages
 
 on:
   schedule:
-    # Runs at 10:30 PM ET Monday–Friday (2:30 AM UTC Tue–Sat)
-    # Adjust if you need pre-market or different timezone
-    - cron: '30 2 * * 2-6'
+    # Runs at 5:30 AM MST Monday–Friday (12:30 PM UTC Mon–Fri)
+    # Adjust if you need a different timezone
+    - cron: '30 12 * * 1-5'
   workflow_dispatch: # allow manual trigger from GitHub UI
 
 permissions:
