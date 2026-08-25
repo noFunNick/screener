@@ -1,0 +1,14 @@
+{
+  "name": "screener-web",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "fetch-data": "node fetch_yahoo.mjs",
+    "run-momentum": "node momentum_setups.mjs"
+  },
+  "dependencies": {
+    "yahoo-finance2": "^4.0.2",
+    "technicalindicators": "^3.1.0",
+    "properties-reader": "^2.2.0"
+  }
+}

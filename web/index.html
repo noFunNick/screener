@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Momentum Top 20</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Top 20 Momentum Results</h1>
+    <p id="message">Loading results...</p>
+    <div class="chart-wrap">
+      <div id="main-chart"></div>
+    </div>
+    <h2>Top 20 Table</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Symbol</th><th>Value</th></tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+    <h2>Ranked Results</h2>
+    <p class="hint">Scroll the list below to inspect each result (top 20 shown).</p>
+    <div id="cards" class="cards"></div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

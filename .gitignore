@@ -1,0 +1,10 @@
+node_modules/
+package-lock.json
+
+# Local debug scripts
+debug_chart.mjs
+debug_options.mjs
+
+# Scan output stays local unless committed by CI
+# Remove the lines below if you want to commit results manually
+# momentum_results_*.json
