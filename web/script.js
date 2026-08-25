@@ -56,12 +56,12 @@
   const top = entries.slice(0,20);
 
   // Fill table (top 20)
-  const tbody = document.getElementById('results-body');
-  top.forEach((e,i)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${e.label}</td><td>${e.value}</td>`;
-    tbody.appendChild(tr);
-  });
+//   const tbody = document.getElementById('results-body');
+//   top.forEach((e,i)=>{
+//     const tr = document.createElement('tr');
+//     tr.innerHTML = `<td>${i+1}</td><td>${e.label}</td><td>${e.value}</td>`;
+//     tbody.appendChild(tr);
+//   });
 
   // Render main stock chart for the top symbol (or selected)
   const mainChartDiv = document.getElementById('main-chart');
