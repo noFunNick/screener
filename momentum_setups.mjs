@@ -150,34 +150,43 @@ function normalizeRiskMode(cfg) {
   return (mode === 'risk-off' || mode === 'riskoff' || mode === 'defensive') ? 'risk-off' : 'normal';
 }
 
-async function hasLiquidOptions(symbol, min_oi = 250, max_spread_pct = 0.25, min_volume = 100) {
+async function hasLiquidOptions(symbol, min_oi = 800, max_spread_pct = 0.20, min_volume = 10) {
   try {
     const opt = await yahooFinance.options(symbol);
     if (!opt || !opt.options || !opt.options.length) return false;
-    const chain = opt.options[0];
+    const maxExpiryMs = 7 * 24 * 60 * 60 * 1000;
+    const shortDatedChains = opt.options.filter(chain => {
+      const expiry = chain.expirationDate ? new Date(chain.expirationDate) : null;
+      return expiry && Number.isFinite(expiry.getTime()) && (expiry.getTime() - Date.now()) <= maxExpiryMs;
+    });
+    if (!shortDatedChains.length) return false;
+
     const price = opt.quote?.regularMarketPrice || opt.quote?.price || 0;
-    const calls = chain.calls || [];
-    const puts = chain.puts || [];
-    const allContracts = [...calls, ...puts];
-    if (!allContracts.length) return false;
 
-    const otm_pct = 0.10;
-    const lo = price * (1 - otm_pct);
-    const hi = price * (1 + otm_pct);
+    return shortDatedChains.some(chain => {
+      const calls = chain.calls || [];
+      const puts = chain.puts || [];
+      const allContracts = [...calls, ...puts];
+      if (!allContracts.length) return false;
 
-    return allContracts.some(c => {
-      const strike = Number(c.strike);
-      if (price > 0 && (strike < lo || strike > hi)) return false;
-      const oi = Number(c.openInterest) || 0;
-      if (oi < min_oi) return false;
-      const bid = Number(c.bid) || 0;
-      const ask = Number(c.ask) || 0;
-      const vol = Number(c.volume) || 0;
-      const mid = (bid + ask) / 2;
-      if (mid > 0) {
-        return (ask - bid) / mid <= max_spread_pct;
-      }
-      return vol >= min_volume;
+      const otm_pct = 0.10;
+      const lo = price * (1 - otm_pct);
+      const hi = price * (1 + otm_pct);
+
+      return allContracts.some(c => {
+        const strike = Number(c.strike);
+        if (price > 0 && (strike < lo || strike > hi)) return false;
+        const oi = Number(c.openInterest) || 0;
+        if (oi < min_oi) return false;
+        const bid = Number(c.bid) || 0;
+        const ask = Number(c.ask) || 0;
+        const vol = Number(c.volume) || 0;
+        const mid = (bid + ask) / 2;
+        if (mid > 0) {
+          return (ask - bid) / mid <= max_spread_pct;
+        }
+        return vol >= min_volume;
+      });
     });
   } catch (e) {
     return false;
@@ -262,7 +271,7 @@ async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = [], 
     const dollarVol = closes20.reduce((s, c, idx) => s + c * vols20[idx], 0) / Math.min(20, closes20.length);
     if (dollarVol < 15_000_000) return skip(`dollar volume too low (${Math.round(dollarVol)})`);
 
-    const options_ok = await hasLiquidOptions(symbol, 250, 0.25, 100);
+    const options_ok = await hasLiquidOptions(symbol, 1000, 0.20, 10);
 
     const commonLen = Math.min(spyClose.length, close.length);
     const lookback = Math.min(63, Math.max(commonLen - 1, 1));

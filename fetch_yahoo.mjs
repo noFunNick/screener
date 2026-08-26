@@ -52,7 +52,8 @@ const from = new Date(today);
 // fetch ~90 days of daily history so main stock charts have context
 from.setDate(from.getDate() - 90);
 const period1 = formatDate(from);
-const period2 = formatDate(today);
+// Yahoo chart endpoints treat period2 as exclusive, so use tomorrow to include today's bar.
+const period2 = formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000));
 
 // Support v2 (functional API) and v3 (class-based) shapes of yahoo-finance2
 let yfClient = null;
