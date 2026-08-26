@@ -53,11 +53,12 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add web/latest.json "web/momentum_results_*.json" web/data/
+          git add web/latest.json "web/momentum_results_*.json" web/data/ "momentum_results_*.json"
           if git diff --cached --quiet; then
             echo "No result changes to commit"
           else
             git commit -m "chore: update scan results $(date +%Y-%m-%d)"
+            git status --short
             git pull --rebase origin main
             git push origin HEAD:main
           fi
