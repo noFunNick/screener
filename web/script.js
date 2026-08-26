@@ -217,15 +217,31 @@
   }
 
   // Honorable mentions list (next 20 scores) without mini charts
-  //retrieve honorable mentions from JSON file if available
-  let mentions = [];
+  // Default source: ranks 21-40 from the same loaded result set.
+  let mentions = entries.slice(20,40);
+  // Optional override file, but normalize it to the same shape.
   try {
-    const res = await fetch(`./momentum_honorable_mentions.json`);
-    if(res.ok) mentions = await res.json();
+    const res = await fetch('./momentum_honorable_mentions.json');
+    if(res.ok){
+      const mentionData = await res.json();
+      if(Array.isArray(mentionData) && mentionData.length){
+        if(typeof mentionData[0] === 'object'){
+          const sample = mentionData[0];
+          const labelKey = Object.keys(sample).find(k=> /symbol|ticker|name/i.test(k)) || Object.keys(sample)[0];
+          const valueKey = Object.keys(sample).find(k=> /score|value|rank|momentum/i.test(k)) || Object.keys(sample).find(k=> typeof sample[k] === 'number');
+          mentions = mentionData.map(item => ({
+            label: item[labelKey] ?? item.symbol ?? '',
+            value: Number(item[valueKey]) || 0,
+            raw: item
+          }));
+        }else{
+          mentions = mentionData.map(v => ({ label: String(v), value: 0, raw: {} }));
+        }
+      }
+    }
   } catch(err) {
     console.log('Error fetching honorable mentions:', err);
   }
-  //populate honorable mentions section
 
   const mentionsEl = document.getElementById('mentions');
   if(mentionsEl){
@@ -238,7 +254,7 @@
       row.innerHTML = `
         <div class="mention-head">
           <div class="rank">#${rank}</div>
-          <div class="symbol"><a href="https://finance.yahoo.com/chart/${encodeURIComponent(e.label)}" target="_blank" rel="noopener noreferrer">${e.label}</a></div>
+          <div class="symbol"><a href="https://finance.yahoo.com/chart/${encodeURIComponent(e.label || '')}" target="_blank" rel="noopener noreferrer">${e.label || 'n/a'}</a></div>
           <div class="score">${num(e.value, 1)}</div>
         </div>
         <div class="metrics">${indicatorChips(e.raw || e)}</div>

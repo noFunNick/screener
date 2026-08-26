@@ -265,14 +265,17 @@ async function main(){
     else{ console.log(' skipped'); }
   }
   results.sort((a,b)=>b.score - a.score);
-  const top20 = results.slice(0,20);
-  const honorableMentions = results.slice(20,40);
+  const top40 = results.slice(0,40);
+  const honorableMentions = top40.slice(20,40);
   const outFile = path.join(root, `momentum_results_${formatDate(new Date())}.json`);
-  await fs.writeFile(outFile, JSON.stringify(top20, null, 2), 'utf8');
+  await fs.writeFile(outFile, JSON.stringify(top40, null, 2), 'utf8');
   console.log('Wrote', outFile);
   const honorableMentionsFile = path.join(root, `momentum_honorable_mentions_${formatDate(new Date())}.json`);
   await fs.writeFile(honorableMentionsFile, JSON.stringify(honorableMentions, null, 2), 'utf8');
   console.log('Wrote', honorableMentionsFile);
+  const honorableMentionsLatestFile = path.join(root, 'momentum_honorable_mentions.json');
+  await fs.writeFile(honorableMentionsLatestFile, JSON.stringify(honorableMentions, null, 2), 'utf8');
+  console.log('Wrote', honorableMentionsLatestFile);
 }
 
 main().catch(e=>{ console.error(e); process.exit(1); });
