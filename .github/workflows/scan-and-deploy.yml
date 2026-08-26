@@ -36,6 +36,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Rank industries
+        env:
+          MAX_SYMBOLS: '600'
+          INDUSTRY_CONCURRENCY: '8'
+          MIN_INDUSTRY_COUNT: '4'
+        run: node rank_industries.mjs
+
       - name: Run momentum scanner
         run: node momentum_setups.mjs
 

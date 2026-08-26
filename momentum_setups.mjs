@@ -27,7 +27,9 @@ function readConfig(file = 'config.properties') {
       NYSE: props.get('NYSE'),
       NASDAQ1B: props.get('NASDAQ1B'),
       TEST: props.get('TEST'),
-      RISK_MODE: props.get('RISK_MODE')
+      RISK_MODE: props.get('RISK_MODE'),
+      INDUSTRY_MIN_BREADTH: props.get('INDUSTRY_MIN_BREADTH'),
+      INDUSTRY_MIN_COUNT: props.get('INDUSTRY_MIN_COUNT')
     };
   } catch (e) {
     console.error('Failed to read config.properties', e);
@@ -43,6 +45,103 @@ function tomorrow() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   return formatDate(d);
+}
+
+function parseNumOr(v, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function normalizeSymbol(sym) {
+  return String(sym || '').trim().replace(/[./]/g, '-');
+}
+
+function parseCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (ch === ',' && !inQuotes) {
+      out.push(cur);
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+async function loadIndustryMap(csvPath) {
+  try {
+    const txt = await fs.readFile(csvPath, 'utf8');
+    const lines = txt.split(/\r?\n/).filter(Boolean);
+    if (!lines.length) return new Map();
+    const headers = parseCsvLine(lines[0]);
+    const symbolIdx = headers.findIndex(h => /symbol/i.test(h));
+    const industryIdx = headers.findIndex(h => /^industry$/i.test(h.trim()));
+    if (symbolIdx < 0 || industryIdx < 0) return new Map();
+
+    const map = new Map();
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCsvLine(lines[i]);
+      const symbolRaw = (cols[symbolIdx] || '').trim();
+      const industry = (cols[industryIdx] || '').trim();
+      if (!symbolRaw || !industry) continue;
+      map.set(symbolRaw, industry);
+      map.set(normalizeSymbol(symbolRaw), industry);
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+async function loadIndustryRanks(filePath) {
+  try {
+    const txt = await fs.readFile(filePath, 'utf8');
+    const parsed = JSON.parse(txt);
+    const rows = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.rankings) ? parsed.rankings : []);
+    const rankMap = new Map();
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      const industry = (r.industry || r.name || '').trim();
+      if (!industry) continue;
+      const rank = Number(r.rank) || (i + 1);
+      rankMap.set(industry, {
+        rank,
+        breadth: parseNumOr(r.breadth, 0),
+        count: parseNumOr(r.count, 0),
+        industry_score: parseNumOr(r.industry_score, 0)
+      });
+    }
+    return rankMap;
+  } catch {
+    return new Map();
+  }
+}
+
+function industryBonusFromStats(stats, opts) {
+  if (!stats) return 0;
+  const rank = Number(stats.rank);
+  const breadth = parseNumOr(stats.breadth, 0);
+  const count = parseNumOr(stats.count, 0);
+  if (!Number.isFinite(rank)) return 0;
+  if (breadth < opts.minBreadth || count < opts.minCount) return 0;
+  if (rank <= 5) return 12;
+  if (rank <= 10) return 8;
+  if (rank <= 20) return 4;
+  return 0;
 }
 
 function normalizeRiskMode(cfg) {
@@ -99,18 +198,24 @@ function lastAdxParts(adxArr) {
   };
 }
 
-async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = []) {
+async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = [], industryCtx = null) {
   try {
-    const sym = symbol.replace('.', '-');
+    const debugSkip = process.env.DEBUG_SKIP === '1';
+    const skip = (reason) => {
+      if (debugSkip) console.log(`  [skip] ${symbol}: ${reason}`);
+      return null;
+    };
+
+    const sym = normalizeSymbol(symbol);
     const chartData = await yahooFinance.chart(sym, {
       period1: periodStart,
       period2: tomorrow(),
       interval: '1d'
     });
-    if (!chartData || !Array.isArray(chartData.quotes) || chartData.quotes.length === 0) return null;
+    if (!chartData || !Array.isArray(chartData.quotes) || chartData.quotes.length === 0) return skip('no chart quotes');
 
     const hist = chartData.quotes.filter(h => h.close != null && h.high != null && h.low != null && h.volume != null);
-    if (!Array.isArray(hist) || hist.length < 120) return null;
+    if (!Array.isArray(hist) || hist.length < 120) return skip(`insufficient history (${hist?.length || 0})`);
 
     const close = hist.map(h => h.close);
     const high = hist.map(h => h.high);
@@ -149,13 +254,13 @@ async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = []) 
       MACD_hist: macd.length ? (macd[macd.length - 1].histogram || macd[macd.length - 1].hist || 0) : 0
     };
 
-    if (latest.Close < 3) return null;
-    if (latest.Close > 500) return null;
+    if (latest.Close < 3) return skip('price below 3');
+    if (latest.Close > 2000) return skip('price above 2000');
 
     const closes20 = close.slice(-20);
     const vols20 = volume.slice(-20);
     const dollarVol = closes20.reduce((s, c, idx) => s + c * vols20[idx], 0) / Math.min(20, closes20.length);
-    if (dollarVol < 15_000_000) return null;
+    if (dollarVol < 15_000_000) return skip(`dollar volume too low (${Math.round(dollarVol)})`);
 
     const options_ok = await hasLiquidOptions(symbol, 250, 0.25, 100);
 
@@ -176,8 +281,8 @@ async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = []) 
     const rel_vol_today = volume[volume.length - 1] / (vol20 || 1);
     const rel_vol_5d = vol5 / (vol20 || 1);
 
-    // Skip quiet names that just drifted into the high
-    if (rel_vol_today < 0.8 && rel_vol_5d < 1.1) return null;
+    // Skip only extremely quiet names; previous thresholds were filtering too broadly.
+    if (rel_vol_today < 0.55 && rel_vol_5d < 0.9) return skip(`too quiet (relVol=${rel_vol_today.toFixed(2)}, relVol5d=${rel_vol_5d.toFixed(2)})`);
 
     const prev = { High: high[high.length - 2], Close: close[close.length - 2] };
     const prev2 = { High: high[high.length - 3], Close: close[close.length - 3] };
@@ -284,6 +389,12 @@ async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = []) 
 
     if (!options_ok) score -= 4;
 
+    const industry = industryCtx?.industryBySymbol?.get(symbol) || industryCtx?.industryBySymbol?.get(sym) || null;
+    const industryStats = industry ? industryCtx?.rankByIndustry?.get(industry) : null;
+    const industryRank = industryStats?.rank ?? null;
+    const industry_bonus = industryBonusFromStats(industryStats, industryCtx?.bonusOpts || { minBreadth: 0.2, minCount: 4 });
+    score += industry_bonus;
+
     const entry = latest.Close;
     const stop = entry - 1.2 * latest.ATR;
     const target = entry + 2.5 * latest.ATR;
@@ -308,6 +419,11 @@ async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = []) 
       risk_reward: Math.round(risk_reward * 100) / 100,
       dollar_vol_20d: Math.round(dollarVol),
       options_ok: Boolean(options_ok),
+      industry,
+      industry_rank: industryRank || null,
+      industry_breadth: industryStats?.breadth ?? null,
+      industry_count: industryStats?.count ?? null,
+      industry_bonus,
       higher_high: Boolean(higher_high),
       consecutive_up: Boolean(consecutive_up),
       extended: Boolean(rsiVal > 70 || stretch > 5)
@@ -321,6 +437,16 @@ async function analyze(symbol, periodStart, riskMode = 'normal', spyClose = []) 
 async function main() {
   const cfg = readConfig();
   const riskMode = normalizeRiskMode(cfg);
+  const bonusOpts = {
+    minBreadth: parseNumOr(process.env.INDUSTRY_MIN_BREADTH ?? cfg.INDUSTRY_MIN_BREADTH, 0.22),
+    minCount: parseNumOr(process.env.INDUSTRY_MIN_COUNT ?? cfg.INDUSTRY_MIN_COUNT, 5)
+  };
+  const industryBySymbol = await loadIndustryMap(path.join(root, 'all_1bn_MarketCap.csv'));
+  const rankByIndustry = await loadIndustryRanks(path.join(root, 'industry_rankings_latest.json'));
+  console.log(`Industry map loaded: ${industryBySymbol.size} symbol keys`);
+  console.log(`Industry ranks loaded: ${rankByIndustry.size} industries`);
+  console.log(`Industry bonus gates: breadth>=${bonusOpts.minBreadth}, count>=${bonusOpts.minCount}`);
+  const industryCtx = { industryBySymbol, rankByIndustry, bonusOpts };
   const tickerStr = cfg.NASDAQ1B //|| cfg.TICKERS || cfg.TEST || '';
   const tickers = tickerStr.split(/\s+/).filter(Boolean);
   if (!tickers.length) {
@@ -345,7 +471,7 @@ async function main() {
   for (let i = 0; i < tickers.length; i++) {
     const s = tickers[i];
     process.stdout.write(`[${i + 1}/${tickers.length}] ${s}...`);
-    const r = await analyze(s, startStr, riskMode, spyClose);
+    const r = await analyze(s, startStr, riskMode, spyClose, industryCtx);
     if (r) {
       results.push(r);
       console.log(` score=${r.score}${r.extended ? ' [extended]' : ''}`);

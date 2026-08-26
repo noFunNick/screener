@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "fetch-data": "node fetch_yahoo.mjs",
-    "run-momentum": "node momentum_setups.mjs"
+    "run-momentum": "node momentum_setups.mjs",
+    "rank-industries": "node rank_industries.mjs",
+    "run-momentum-with-industry": "npm run rank-industries ; npm run run-momentum"
   },
   "dependencies": {
     "yahoo-finance2": "^4.0.2",
