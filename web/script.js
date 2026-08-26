@@ -217,6 +217,16 @@
   }
 
   // Honorable mentions list (next 20 scores) without mini charts
+  //retrieve honorable mentions from JSON file if available
+  let mentions = [];
+  try {
+    const res = await fetch(`./momentum_honorable_mentions.json`);
+    if(res.ok) mentions = await res.json();
+  } catch(err) {
+    console.log('Error fetching honorable mentions:', err);
+  }
+  //populate honorable mentions section
+  
   const mentionsEl = document.getElementById('mentions');
   if(mentionsEl){
     mentionsEl.innerHTML = '';
