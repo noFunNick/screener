@@ -24,7 +24,7 @@ table tbody td{ padding:8px; border-bottom:1px solid #f1f1f1 }
 .card-body{ margin-top:8px }
 .bar-wrap{ height:12px; background:#f3f6fb; border:1px solid #eee }
 .bar-fill{ height:12px; background:linear-gradient(90deg, #36a2eb, #0b84ff) }
-.metrics{ margin-top:6px; display:flex; gap:12px; color:#555; font-size:13px }
+.metrics{ margin-top:6px; display:flex; gap:12px; color:#555; font-size:13px } 
 .metrics{ flex-wrap:wrap }
 .metric-chip{ background:#f4f7fb; border:1px solid #e6edf7; color:#2f3e52; padding:2px 8px; border-radius:999px; font-size:12px }
 .hint{ color:#666; margin-top:6px; margin-bottom:6px }
