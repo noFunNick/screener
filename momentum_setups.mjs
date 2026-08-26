@@ -186,11 +186,11 @@ async function hasLiquidOptions(symbol, min_oi = 800, max_spread_pct = 0.20, min
         const strike = Number(c.strike);
         if (price > 0 && (strike < lo || strike > hi)) return false;
         const oi = Number(c.openInterest) || 0;
-        if (oi < min_oi){
-            console.log(`[${symbol}] skipping contract with low OI: strike=${strike}, OI=${oi}, bid=${c.bid}, ask=${c.ask}`);
-            return false;
+        // if (oi < min_oi){
+        //     //console.log(`[${symbol}] skipping contract with low OI: strike=${strike}, OI=${oi}, bid=${c.bid}, ask=${c.ask}`);
+        //     return false;
 
-        } 
+        // } 
         const bid = Number(c.bid) || 0;
         const ask = Number(c.ask) || 0;
         const vol = Number(c.volume) || 0;
