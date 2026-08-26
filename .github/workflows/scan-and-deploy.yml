@@ -53,11 +53,14 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git rebase origin/main
           git add web/latest.json "web/momentum_results_*.json" web/data/
-          git diff --cached --quiet || git commit -m "chore: update scan results $(date +%Y-%m-%d)"
-          git push origin HEAD:main
+          if git diff --cached --quiet; then
+            echo "No result changes to commit"
+          else
+            git commit -m "chore: update scan results $(date +%Y-%m-%d)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
