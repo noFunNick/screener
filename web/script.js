@@ -55,7 +55,7 @@
 
   entries.sort((a,b)=>b.value - a.value);
   const top = entries.slice(0,20);
-  const mentions = entries.slice(20,40);
+//   const mentions = entries.slice(20,40);
 
   function num(v, digits=2){
     const n = Number(v);
@@ -226,7 +226,7 @@
     console.log('Error fetching honorable mentions:', err);
   }
   //populate honorable mentions section
-  
+
   const mentionsEl = document.getElementById('mentions');
   if(mentionsEl){
     mentionsEl.innerHTML = '';
