@@ -55,6 +55,25 @@
 
   entries.sort((a,b)=>b.value - a.value);
   const top = entries.slice(0,20);
+  const mentions = entries.slice(20,40);
+
+  function num(v, digits=2){
+    const n = Number(v);
+    return Number.isFinite(n) ? n.toFixed(digits) : 'n/a';
+  }
+
+  function indicatorChips(raw){
+    return `
+      <span class="metric-chip">Close: ${num(raw?.close, 2)}</span>
+      <span class="metric-chip">RSI: ${num(raw?.rsi, 1)}</span>
+      <span class="metric-chip">ADX: ${num(raw?.adx, 1)}</span>
+      <span class="metric-chip">RelVol: ${num(raw?.rel_vol_today, 2)}x</span>
+      <span class="metric-chip">RelVol5d: ${num(raw?.rel_vol_5d, 2)}x</span>
+      <span class="metric-chip">RS(3m): ${num(raw?.rs_3m, 2)}</span>
+      <span class="metric-chip">ATR: ${num(raw?.atr, 2)}</span>
+      <span class="metric-chip">FromHigh: ${num(raw?.pct_from_high, 2)}%</span>
+    `;
+  }
 
   // Fill table (top 20)
 //   const tbody = document.getElementById('results-body');
@@ -147,11 +166,7 @@
           <div class="mini-chart" id="mini-${i}" aria-hidden="true"></div>
           <div style="flex:1">
             <div class="bar-wrap"><div class="bar-fill" style="width:${scorePct}%"></div></div>
-            <div class="metrics">
-              <span>Close: ${e.raw?.close ?? e.close ?? ''}</span>
-              <span>Vol: ${e.raw?.rel_vol_today ?? e.rel_vol_today ?? ''}</span>
-              <span>RSI: ${e.raw?.rsi ?? e.rsi ?? ''}</span>
-            </div>
+            <div class="metrics">${indicatorChips(e.raw || e)}</div>
           </div>
         </div>
       </div>`;
@@ -199,6 +214,27 @@
     }
     // small delay to keep UI responsive and avoid overloading Plotly
     await new Promise(r => setTimeout(r, 80));
+  }
+
+  // Honorable mentions list (next 20 scores) without mini charts
+  const mentionsEl = document.getElementById('mentions');
+  if(mentionsEl){
+    mentionsEl.innerHTML = '';
+    for(let i = 0; i < mentions.length; i++){
+      const e = mentions[i];
+      const rank = i + 21;
+      const row = document.createElement('div');
+      row.className = 'mention-row';
+      row.innerHTML = `
+        <div class="mention-head">
+          <div class="rank">#${rank}</div>
+          <div class="symbol"><a href="https://finance.yahoo.com/chart/${encodeURIComponent(e.label)}" target="_blank" rel="noopener noreferrer">${e.label}</a></div>
+          <div class="score">${num(e.value, 1)}</div>
+        </div>
+        <div class="metrics">${indicatorChips(e.raw || e)}</div>
+      `;
+      mentionsEl.appendChild(row);
+    }
   }
 
   msg.textContent = '';
