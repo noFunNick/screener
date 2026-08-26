@@ -156,10 +156,10 @@ async function analyze(symbol, periodStart, riskMode='normal'){
 
     const riskOff = riskMode === 'risk-off';
 
-    // risk-off hard guards to reduce late-stage chase names
+    // risk-off guards to reduce late-stage chase names
     if(riskOff){
-      if(rel_vol_5d < 1.15) return null;
-      if(pct_from_high > 1.4 || atr_from_high > 1.0) return null;
+      if(rel_vol_5d < 1.15) score -= 10;
+      if(pct_from_high > 1.4 || atr_from_high > 1.0) score -= 10;
     }
 
     // scoring (mirror python)
@@ -189,11 +189,11 @@ async function analyze(symbol, periodStart, riskMode='normal'){
 
     const adxv = latest.ADX; const adx_rising = adxv > (adx.length>1?adx[adx.length-2].adx||adx[adx.length-2]:0);
     if(riskOff){
-      if(di_spread < 6 || !adx_rising) return null;
+      if(di_spread < 6 || !adx_rising) score -= 8;
       if(adxv >= 35 && adx_rising) score += 12;
       else if(adxv >= 30 && adx_rising) score += 9;
       else if(adxv >=25 && adx_rising) score += 6;
-      else return null;
+      else score -= 8;
     }else{
       if(adxv >= 35 && adx_rising) score += 12; else if(adxv >= 30) score += 9; else if(adxv >=25) score += 6; else if(adxv >=20) score += 3;
     }
@@ -217,10 +217,7 @@ async function analyze(symbol, periodStart, riskMode='normal'){
       else score -= 3;
     }else if(latest.MACD_hist > 0) score += 2; // simplified
 
-    if(!options_ok){
-        console.log(`  [!] ${symbol}: No liquid options`);
-        return null;
-    }
+    if(!options_ok) score -= 4;
 
     const entry = latest.Close; const stop = entry - 1.2 * latest.ATR; const target = entry + 2.5 * latest.ATR;
     const risk_reward = (target-entry)/(entry-stop > 0 ? (entry-stop) : 1);
