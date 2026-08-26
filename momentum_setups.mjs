@@ -153,13 +153,19 @@ function normalizeRiskMode(cfg) {
 async function hasLiquidOptions(symbol, min_oi = 800, max_spread_pct = 0.20, min_volume = 10) {
   try {
     const opt = await yahooFinance.options(symbol);
-    if (!opt || !opt.options || !opt.options.length) return false;
+    if (!opt || !opt.options || !opt.options.length){
+        console.log(`[${symbol}] no option chains found`);
+        return false;
+    } 
     const maxExpiryMs = 7 * 24 * 60 * 60 * 1000;
     const shortDatedChains = opt.options.filter(chain => {
       const expiry = chain.expirationDate ? new Date(chain.expirationDate) : null;
       return expiry && Number.isFinite(expiry.getTime()) && (expiry.getTime() - Date.now()) <= maxExpiryMs;
     });
-    if (!shortDatedChains.length) return false;
+    if (!shortDatedChains.length) {
+        console.log(`[${symbol}] no short-dated option chains found (<=7 days to expiry)`);
+      return false;
+    }
 
     const price = opt.quote?.regularMarketPrice || opt.quote?.price || 0;
 
@@ -167,7 +173,10 @@ async function hasLiquidOptions(symbol, min_oi = 800, max_spread_pct = 0.20, min
       const calls = chain.calls || [];
       const puts = chain.puts || [];
       const allContracts = [...calls, ...puts];
-      if (!allContracts.length) return false;
+      if (!allContracts.length){
+        console.log(`[${symbol}] no calls or puts found for chain expiring ${chain.expirationDate}`);
+        return false;
+      } 
 
       const otm_pct = 0.10;
       const lo = price * (1 - otm_pct);
@@ -177,7 +186,11 @@ async function hasLiquidOptions(symbol, min_oi = 800, max_spread_pct = 0.20, min
         const strike = Number(c.strike);
         if (price > 0 && (strike < lo || strike > hi)) return false;
         const oi = Number(c.openInterest) || 0;
-        if (oi < min_oi) return false;
+        if (oi < min_oi){
+            console.log(`[${symbol}] skipping contract with low OI: strike=${strike}, OI=${oi}, bid=${c.bid}, ask=${c.ask}`);
+            return false;
+
+        } 
         const bid = Number(c.bid) || 0;
         const ask = Number(c.ask) || 0;
         const vol = Number(c.volume) || 0;
