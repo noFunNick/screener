@@ -25,7 +25,8 @@ function readConfig(file='config.properties'){
       TICKERS: props.get('TICKERS'),
       NYSE: props.get('NYSE'),
       NASDAQ1B: props.get('NASDAQ1B'),
-      TEST: props.get('TEST')
+      TEST: props.get('TEST'),
+      RISK_MODE: props.get('RISK_MODE')
     };
   }catch(e){
     console.error('Failed to read config.properties', e); return {};
@@ -34,6 +35,12 @@ function readConfig(file='config.properties'){
 
 function formatDate(d){ return d.toISOString().slice(0,10); }
 function tomorrow(){ const d = new Date(); d.setDate(d.getDate()+1); return formatDate(d); }
+
+function normalizeRiskMode(cfg){
+  const raw = process.env.RISK_MODE ?? cfg.RISK_MODE ?? 'normal';
+  const mode = String(raw).trim().toLowerCase();
+  return (mode === 'risk-off' || mode === 'riskoff' || mode === 'defensive') ? 'risk-off' : 'normal';
+}
 
 async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25, min_volume=100){
   try{
@@ -72,7 +79,7 @@ async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25, min_vol
   }catch(e){ return false; }
 }
 
-async function analyze(symbol, periodStart){
+async function analyze(symbol, periodStart, riskMode='normal'){
   try{
     // chart() in yahoo-finance2 v4 returns { meta, quotes, events }
     // where quotes is an array of { date, open, high, low, close, volume }
@@ -147,6 +154,14 @@ async function analyze(symbol, periodStart){
     const higher_close = latest.Close > prev.Close && prev.Close > prev2.Close;
     const consecutive_up = latest.Close > prev.Close && prev.Close > prev2.Close;
 
+    const riskOff = riskMode === 'risk-off';
+
+    // risk-off hard guards to reduce late-stage chase names
+    if(riskOff){
+      if(rel_vol_5d < 1.15) return null;
+      if(pct_from_high > 1.4 || atr_from_high > 1.0) return null;
+    }
+
     // scoring (mirror python)
     let score = 0.0;
     if(pct_from_high <= 0.3 || atr_from_high <= 0.25) score += 35;
@@ -173,16 +188,34 @@ async function analyze(symbol, periodStart){
     if(plus_di > minus_di){ if(di_spread >= 12) score += 15; else if(di_spread >= 8) score += 11; else if(di_spread >=4) score +=7; else score +=3 }
 
     const adxv = latest.ADX; const adx_rising = adxv > (adx.length>1?adx[adx.length-2].adx||adx[adx.length-2]:0);
-    if(adxv >= 35 && adx_rising) score += 12; else if(adxv >= 30) score += 9; else if(adxv >=25) score += 6; else if(adxv >=20) score += 3;
+    if(riskOff){
+      if(di_spread < 6 || !adx_rising) return null;
+      if(adxv >= 35 && adx_rising) score += 12;
+      else if(adxv >= 30 && adx_rising) score += 9;
+      else if(adxv >=25 && adx_rising) score += 6;
+      else return null;
+    }else{
+      if(adxv >= 35 && adx_rising) score += 12; else if(adxv >= 30) score += 9; else if(adxv >=25) score += 6; else if(adxv >=20) score += 3;
+    }
 
     if(higher_high && higher_close) score += 10; else if(consecutive_up) score += 6; else if(latest.Close > prev.Close) score +=3;
 
     if(rs >= 1.20) score += 8; else if(rs >= 1.10) score +=6; else if(rs >=1.03) score +=4; else if(rs >=0.98) score +=1;
 
     const rsiVal = latest.RSI;
-    if(55 <= rsiVal && rsiVal <= 70) score += 15; else if(rsiVal > 70 && rsiVal <= 80) score += 5; else if(rsiVal > 80) score -= 2; else if(rsiVal < 40) score -= 6;
+    if(riskOff){
+      if(55 <= rsiVal && rsiVal <= 68) score += 10;
+      else if(rsiVal > 68 && rsiVal <= 75) score += 2;
+      else if(rsiVal > 75) score -= 8;
+      else if(rsiVal < 45) score -= 8;
+    }else{
+      if(55 <= rsiVal && rsiVal <= 70) score += 15; else if(rsiVal > 70 && rsiVal <= 80) score += 5; else if(rsiVal > 80) score -= 2; else if(rsiVal < 40) score -= 6;
+    }
 
-    if(latest.MACD_hist > 0) score += 2; // simplified
+    if(riskOff){
+      if(latest.MACD_hist > 0) score += 2;
+      else score -= 3;
+    }else if(latest.MACD_hist > 0) score += 2; // simplified
 
     if(!options_ok){
         console.log(`  [!] ${symbol}: No liquid options`);
@@ -218,17 +251,18 @@ async function analyze(symbol, periodStart){
 
 async function main(){
   const cfg = readConfig();
+  const riskMode = normalizeRiskMode(cfg);
   const tickerStr = cfg.NASDAQ1B// || cfg.TICKERS || '';
   const tickers = tickerStr.split(/\s+/).filter(Boolean);
   if(!tickers.length){ console.error('No tickers in config (TEST or TICKERS)'); process.exit(1); }
   const start = new Date(); start.setDate(start.getDate() - 365);
   const startStr = formatDate(start);
-  console.log(`Scoring ${tickers.length} tickers...`);
+  console.log(`Scoring ${tickers.length} tickers (mode=${riskMode})...`);
   const results = [];
   for(let i=0; i<tickers.length; i++){
     const s = tickers[i];
     process.stdout.write(`[${i+1}/${tickers.length}] ${s}...`);
-    const r = await analyze(s, startStr);
+    const r = await analyze(s, startStr, riskMode);
     if(r){ results.push(r); console.log(` score=${r.score}`); }
     else{ console.log(' skipped'); }
   }
