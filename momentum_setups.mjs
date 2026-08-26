@@ -6,8 +6,8 @@ const rawYahooFinance = yahooFinanceModule.default || yahooFinanceModule;
 let yahooFinance = null;
 try{
   // v4 exports a class that needs instantiation: `new YahooFinance()`
-  // suppress the historical() deprecation notice
-  yahooFinance = (typeof rawYahooFinance === 'function') ? new rawYahooFinance({ suppressNotices: ['ripHistorical'] }) : rawYahooFinance;
+  // suppress one-time notices
+  yahooFinance = (typeof rawYahooFinance === 'function') ? new rawYahooFinance({ suppressNotices: ['ripHistorical', 'yahooSurvey'] }) : rawYahooFinance;
 }catch(e){
   // fallback to raw export
   yahooFinance = rawYahooFinance;
@@ -35,7 +35,7 @@ function readConfig(file='config.properties'){
 function formatDate(d){ return d.toISOString().slice(0,10); }
 function tomorrow(){ const d = new Date(); d.setDate(d.getDate()+1); return formatDate(d); }
 
-async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25){
+async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25, min_volume=100){
   try{
     const opt = await yahooFinance.options(symbol);
     if(!opt || !opt.options || !opt.options.length) return false;
@@ -46,12 +46,14 @@ async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25){
     const allContracts = [...calls, ...puts];
     if(!allContracts.length) return false;
 
-    // Include any contract with a strike within 15% of current price (either direction)
-    const otm_pct = 0.15;
+    // Include any contract with a strike within 10% of current price (either direction)
+    const otm_pct = 0.10;
     const lo = price * (1 - otm_pct);
     const hi = price * (1 + otm_pct);
 
-    // Check if any contract within that band meets both OI and spread
+    // Check if any contract within that band qualifies.
+    // Primary: OI + bid/ask spread.
+    // Fallback: if Yahoo returns zero bid/ask snapshots, allow strong OI+volume.
     return allContracts.some(c => {
       const strike = Number(c.strike);
       if(price > 0 && (strike < lo || strike > hi)) return false;
@@ -59,9 +61,13 @@ async function hasLiquidOptions(symbol, min_oi=250, max_spread_pct=0.25){
       if(oi < min_oi) return false;
       const bid = Number(c.bid) || 0;
       const ask = Number(c.ask) || 0;
+      const vol = Number(c.volume) || 0;
       const mid = (bid + ask) / 2;
-      if(mid <= 0) return false;
-      return (ask - bid) / mid <= max_spread_pct;
+      if(mid > 0){
+        return (ask - bid) / mid <= max_spread_pct;
+      }
+      // Data-quality fallback for delayed/zeroed bid-ask snapshots.
+      return vol >= min_volume;
     });
   }catch(e){ return false; }
 }
@@ -113,7 +119,7 @@ async function analyze(symbol, periodStart){
     const dollarVol = closes.reduce((s,c,idx)=>s + c * vols[idx], 0) / Math.min(20, closes.length);
     if(dollarVol < 15_000_000) return null;
 
-    const options_ok = await hasLiquidOptions(symbol, 250, 0.25);
+    const options_ok = await hasLiquidOptions(symbol, 250, 0.25, 100);
 
     // RS vs SPY via chart()
     const spyData = await yahooFinance.chart('SPY', { period1: periodStart, period2: tomorrow(), interval: '1d' });
