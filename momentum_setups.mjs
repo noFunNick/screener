@@ -250,7 +250,7 @@ async function analyze(symbol, periodStart, riskMode='normal'){
 async function main(){
   const cfg = readConfig();
   const riskMode = normalizeRiskMode(cfg);
-  const tickerStr = cfg.TICKERS// || cfg.TICKERS || '';
+  const tickerStr = cfg.NASDAQ1B// || cfg.TICKERS || '';
   const tickers = tickerStr.split(/\s+/).filter(Boolean);
   if(!tickers.length){ console.error('No tickers in config (TEST or TICKERS)'); process.exit(1); }
   const start = new Date(); start.setDate(start.getDate() - 365);
