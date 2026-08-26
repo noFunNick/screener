@@ -154,6 +154,9 @@ async function analyze(symbol, periodStart, riskMode='normal'){
     const higher_close = latest.Close > prev.Close && prev.Close > prev2.Close;
     const consecutive_up = latest.Close > prev.Close && prev.Close > prev2.Close;
 
+    // scoring (mirror python)
+    let score = 0.0;
+
     const riskOff = riskMode === 'risk-off';
 
     // risk-off guards to reduce late-stage chase names
@@ -162,8 +165,6 @@ async function analyze(symbol, periodStart, riskMode='normal'){
       if(pct_from_high > 1.4 || atr_from_high > 1.0) score -= 10;
     }
 
-    // scoring (mirror python)
-    let score = 0.0;
     if(pct_from_high <= 0.3 || atr_from_high <= 0.25) score += 35;
     else if(pct_from_high <= 0.7 || atr_from_high <= 0.5) score += 28;
     else if(pct_from_high <= 1.2 || atr_from_high <= 0.8) score += 18;
