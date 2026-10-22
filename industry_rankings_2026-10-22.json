@@ -1,0 +1,460 @@
+{
+  "generated_at": "2026-10-22T17:29:10.159Z",
+  "symbols_considered": 600,
+  "symbols_with_metrics": 589,
+  "min_industry_count": 4,
+  "top_industries": [
+    "Major Chemicals",
+    "Package Goods/Cosmetics",
+    "Aerospace",
+    "Military/Government/Technical",
+    "Real Estate Investment Trusts",
+    "Mining & Quarrying of Nonmetallic Minerals (No Fuels)",
+    "Other Metals and Minerals",
+    "Industrial Machinery/Components",
+    "Integrated oil Companies",
+    "Biotechnology: Biological Products (No Diagnostic Substances)",
+    "Restaurants",
+    "Electronic Components",
+    "Auto Manufacturing",
+    "Power Generation",
+    "Air Freight/Delivery Services",
+    "Computer Software: Programming Data Processing",
+    "EDP Services",
+    "Building Materials",
+    "Radio And Television Broadcasting And Communications Equipment",
+    "Metal Mining"
+  ],
+  "rankings": [
+    {
+      "industry": "Major Chemicals",
+      "count": 5,
+      "adx_median": 40.2,
+      "rel_vol_median": 0.42,
+      "rel_vol_5d_median": 0.88,
+      "breadth": 0,
+      "industry_score": 61.96,
+      "rank": 1
+    },
+    {
+      "industry": "Package Goods/Cosmetics",
+      "count": 7,
+      "adx_median": 29.6,
+      "rel_vol_median": 0.63,
+      "rel_vol_5d_median": 0.96,
+      "breadth": 0.143,
+      "industry_score": 56.92,
+      "rank": 2
+    },
+    {
+      "industry": "Aerospace",
+      "count": 4,
+      "adx_median": 35.2,
+      "rel_vol_median": 0.46,
+      "rel_vol_5d_median": 0.73,
+      "breadth": 0,
+      "industry_score": 55.41,
+      "rank": 3
+    },
+    {
+      "industry": "Military/Government/Technical",
+      "count": 5,
+      "adx_median": 34.75,
+      "rel_vol_median": 0.44,
+      "rel_vol_5d_median": 0.81,
+      "breadth": 0,
+      "industry_score": 55.17,
+      "rank": 4
+    },
+    {
+      "industry": "Real Estate Investment Trusts",
+      "count": 15,
+      "adx_median": 33.78,
+      "rel_vol_median": 0.44,
+      "rel_vol_5d_median": 0.82,
+      "breadth": 0,
+      "industry_score": 54.18,
+      "rank": 5
+    },
+    {
+      "industry": "Mining & Quarrying of Nonmetallic Minerals (No Fuels)",
+      "count": 4,
+      "adx_median": 28.42,
+      "rel_vol_median": 0.7,
+      "rel_vol_5d_median": 1,
+      "breadth": 0,
+      "industry_score": 53.39,
+      "rank": 6
+    },
+    {
+      "industry": "Other Metals and Minerals",
+      "count": 5,
+      "adx_median": 31.97,
+      "rel_vol_median": 0.47,
+      "rel_vol_5d_median": 0.83,
+      "breadth": 0,
+      "industry_score": 52.46,
+      "rank": 7
+    },
+    {
+      "industry": "Industrial Machinery/Components",
+      "count": 21,
+      "adx_median": 25.82,
+      "rel_vol_median": 0.65,
+      "rel_vol_5d_median": 0.93,
+      "breadth": 0.095,
+      "industry_score": 51.14,
+      "rank": 8
+    },
+    {
+      "industry": "Integrated oil Companies",
+      "count": 6,
+      "adx_median": 29.04,
+      "rel_vol_median": 0.5,
+      "rel_vol_5d_median": 0.95,
+      "breadth": 0,
+      "industry_score": 50.37,
+      "rank": 9
+    },
+    {
+      "industry": "Biotechnology: Biological Products (No Diagnostic Substances)",
+      "count": 14,
+      "adx_median": 27.32,
+      "rel_vol_median": 0.5,
+      "rel_vol_5d_median": 0.84,
+      "breadth": 0.071,
+      "industry_score": 49.31,
+      "rank": 10
+    },
+    {
+      "industry": "Restaurants",
+      "count": 6,
+      "adx_median": 29.02,
+      "rel_vol_median": 0.47,
+      "rel_vol_5d_median": 0.88,
+      "breadth": 0,
+      "industry_score": 49.31,
+      "rank": 11
+    },
+    {
+      "industry": "Electronic Components",
+      "count": 5,
+      "adx_median": 22.97,
+      "rel_vol_median": 0.86,
+      "rel_vol_5d_median": 0.94,
+      "breadth": 0,
+      "industry_score": 48.76,
+      "rank": 12
+    },
+    {
+      "industry": "Auto Manufacturing",
+      "count": 8,
+      "adx_median": 25.31,
+      "rel_vol_median": 0.64,
+      "rel_vol_5d_median": 1.01,
+      "breadth": 0,
+      "industry_score": 48.61,
+      "rank": 13
+    },
+    {
+      "industry": "Power Generation",
+      "count": 5,
+      "adx_median": 28.56,
+      "rel_vol_median": 0.48,
+      "rel_vol_5d_median": 0.83,
+      "breadth": 0,
+      "industry_score": 48.6,
+      "rank": 14
+    },
+    {
+      "industry": "Air Freight/Delivery Services",
+      "count": 6,
+      "adx_median": 19.87,
+      "rel_vol_median": 0.75,
+      "rel_vol_5d_median": 1.01,
+      "breadth": 0.167,
+      "industry_score": 48.03,
+      "rank": 15
+    },
+    {
+      "industry": "Computer Software: Programming Data Processing",
+      "count": 16,
+      "adx_median": 25.05,
+      "rel_vol_median": 0.55,
+      "rel_vol_5d_median": 0.91,
+      "breadth": 0.063,
+      "industry_score": 47.74,
+      "rank": 16
+    },
+    {
+      "industry": "EDP Services",
+      "count": 18,
+      "adx_median": 27.03,
+      "rel_vol_median": 0.52,
+      "rel_vol_5d_median": 0.86,
+      "breadth": 0,
+      "industry_score": 47.58,
+      "rank": 17
+    },
+    {
+      "industry": "Building Materials",
+      "count": 4,
+      "adx_median": 28.26,
+      "rel_vol_median": 0.41,
+      "rel_vol_5d_median": 0.87,
+      "breadth": 0,
+      "industry_score": 47.44,
+      "rank": 18
+    },
+    {
+      "industry": "Radio And Television Broadcasting And Communications Equipment",
+      "count": 7,
+      "adx_median": 26.28,
+      "rel_vol_median": 0.54,
+      "rel_vol_5d_median": 0.85,
+      "breadth": 0,
+      "industry_score": 47.02,
+      "rank": 19
+    },
+    {
+      "industry": "Metal Mining",
+      "count": 15,
+      "adx_median": 25.16,
+      "rel_vol_median": 0.59,
+      "rel_vol_5d_median": 0.9,
+      "breadth": 0,
+      "industry_score": 46.93,
+      "rank": 20
+    },
+    {
+      "industry": "Major Banks",
+      "count": 15,
+      "adx_median": 27.22,
+      "rel_vol_median": 0.4,
+      "rel_vol_5d_median": 0.96,
+      "breadth": 0,
+      "industry_score": 46.79,
+      "rank": 21
+    },
+    {
+      "industry": "Department/Specialty Retail Stores",
+      "count": 6,
+      "adx_median": 26.7,
+      "rel_vol_median": 0.45,
+      "rel_vol_5d_median": 0.93,
+      "breadth": 0,
+      "industry_score": 46.65,
+      "rank": 22
+    },
+    {
+      "industry": "Beverages (Production/Distribution)",
+      "count": 6,
+      "adx_median": 26.12,
+      "rel_vol_median": 0.49,
+      "rel_vol_5d_median": 0.92,
+      "breadth": 0,
+      "industry_score": 46.53,
+      "rank": 23
+    },
+    {
+      "industry": "Packaged Foods",
+      "count": 7,
+      "adx_median": 26.57,
+      "rel_vol_median": 0.52,
+      "rel_vol_5d_median": 0.73,
+      "breadth": 0,
+      "industry_score": 46.02,
+      "rank": 24
+    },
+    {
+      "industry": "Electric Utilities: Central",
+      "count": 14,
+      "adx_median": 26.41,
+      "rel_vol_median": 0.47,
+      "rel_vol_5d_median": 0.84,
+      "breadth": 0,
+      "industry_score": 46.02,
+      "rank": 25
+    },
+    {
+      "industry": "Real Estate",
+      "count": 4,
+      "adx_median": 24.95,
+      "rel_vol_median": 0.59,
+      "rel_vol_5d_median": 0.83,
+      "breadth": 0,
+      "industry_score": 46.01,
+      "rank": 26
+    },
+    {
+      "industry": "Telecommunications Equipment",
+      "count": 10,
+      "adx_median": 25.27,
+      "rel_vol_median": 0.5,
+      "rel_vol_5d_median": 0.83,
+      "breadth": 0,
+      "industry_score": 44.92,
+      "rank": 27
+    },
+    {
+      "industry": "Semiconductors",
+      "count": 29,
+      "adx_median": 23.09,
+      "rel_vol_median": 0.63,
+      "rel_vol_5d_median": 0.88,
+      "breadth": 0,
+      "industry_score": 44.9,
+      "rank": 28
+    },
+    {
+      "industry": "Finance: Consumer Services",
+      "count": 30,
+      "adx_median": 23.64,
+      "rel_vol_median": 0.52,
+      "rel_vol_5d_median": 0.9,
+      "breadth": 0,
+      "industry_score": 43.89,
+      "rank": 29
+    },
+    {
+      "industry": "Natural Gas Distribution",
+      "count": 6,
+      "adx_median": 22.76,
+      "rel_vol_median": 0.55,
+      "rel_vol_5d_median": 0.95,
+      "breadth": 0,
+      "industry_score": 43.69,
+      "rank": 30
+    },
+    {
+      "industry": "Computer Software: Prepackaged Software",
+      "count": 42,
+      "adx_median": 24.1,
+      "rel_vol_median": 0.48,
+      "rel_vol_5d_median": 0.88,
+      "breadth": 0,
+      "industry_score": 43.63,
+      "rank": 31
+    },
+    {
+      "industry": "Precious Metals",
+      "count": 26,
+      "adx_median": 20.69,
+      "rel_vol_median": 0.66,
+      "rel_vol_5d_median": 0.82,
+      "breadth": 0.038,
+      "industry_score": 42.95,
+      "rank": 32
+    },
+    {
+      "industry": "Commercial Banks",
+      "count": 8,
+      "adx_median": 22.27,
+      "rel_vol_median": 0.5,
+      "rel_vol_5d_median": 0.94,
+      "breadth": 0,
+      "industry_score": 42.26,
+      "rank": 33
+    },
+    {
+      "industry": "Marine Transportation",
+      "count": 7,
+      "adx_median": 24.47,
+      "rel_vol_median": 0.39,
+      "rel_vol_5d_median": 0.76,
+      "breadth": 0,
+      "industry_score": 41.6,
+      "rank": 34
+    },
+    {
+      "industry": "Oil & Gas Production",
+      "count": 18,
+      "adx_median": 20.83,
+      "rel_vol_median": 0.56,
+      "rel_vol_5d_median": 0.95,
+      "breadth": 0,
+      "industry_score": 41.52,
+      "rank": 35
+    },
+    {
+      "industry": "Medical/Dental Instruments",
+      "count": 6,
+      "adx_median": 21.13,
+      "rel_vol_median": 0.47,
+      "rel_vol_5d_median": 0.98,
+      "breadth": 0,
+      "industry_score": 40.74,
+      "rank": 36
+    },
+    {
+      "industry": "Business Services",
+      "count": 14,
+      "adx_median": 20.55,
+      "rel_vol_median": 0.54,
+      "rel_vol_5d_median": 0.91,
+      "breadth": 0,
+      "industry_score": 40.59,
+      "rank": 37
+    },
+    {
+      "industry": "Computer Manufacturing",
+      "count": 5,
+      "adx_median": 18.74,
+      "rel_vol_median": 0.55,
+      "rel_vol_5d_median": 1.01,
+      "breadth": 0,
+      "industry_score": 39.36,
+      "rank": 38
+    },
+    {
+      "industry": "Biotechnology: Pharmaceutical Preparations",
+      "count": 30,
+      "adx_median": 21.46,
+      "rel_vol_median": 0.42,
+      "rel_vol_5d_median": 0.83,
+      "breadth": 0,
+      "industry_score": 39.16,
+      "rank": 39
+    },
+    {
+      "industry": "RETAIL: Building Materials",
+      "count": 4,
+      "adx_median": 19.92,
+      "rel_vol_median": 0.53,
+      "rel_vol_5d_median": 0.85,
+      "breadth": 0,
+      "industry_score": 39.13,
+      "rank": 40
+    },
+    {
+      "industry": "Apparel",
+      "count": 5,
+      "adx_median": 21.15,
+      "rel_vol_median": 0.39,
+      "rel_vol_5d_median": 0.86,
+      "breadth": 0,
+      "industry_score": 38.56,
+      "rank": 41
+    },
+    {
+      "industry": "Investment Bankers/Brokers/Service",
+      "count": 11,
+      "adx_median": 20.21,
+      "rel_vol_median": 0.48,
+      "rel_vol_5d_median": 0.82,
+      "breadth": 0,
+      "industry_score": 38.46,
+      "rank": 42
+    },
+    {
+      "industry": "Medical Specialities",
+      "count": 6,
+      "adx_median": 19.96,
+      "rel_vol_median": 0.34,
+      "rel_vol_5d_median": 0.8,
+      "breadth": 0,
+      "industry_score": 35.82,
+      "rank": 43
+    }
+  ]
+}
